@@ -1,7 +1,8 @@
-//! Extracts documented items from .rs and .slint source files.
+//! Extracts all public items from .rs and .slint source files.
 //!
-//! Convention: a `///` comment block immediately above a public item
-//! (optionally separated only by `#[...]` attributes) documents that item.
+//! Items with `///` doc comments above them get a populated `doc` field.
+//! Items without doc comments are still emitted with `doc = ""` so that
+//! the viewer shows the full public surface and `check` can flag gaps.
 
 use std::path::Path;
 use regex::Regex;
@@ -32,6 +33,9 @@ static PUB_MOD: LazyLock<Regex> = LazyLock::new(|| {
 static PUB_CONST: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\s*pub(?:\([^)]+\))?\s+(?:const|static)\s+(\w+)").unwrap()
 });
+static PUB_USE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\s*pub(?:\([^)]+\))?\s+use\s+").unwrap()
+});
 static ATTRIBUTE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\s*#\[").unwrap()
 });
@@ -56,7 +60,8 @@ static SLINT_PROPERTY: LazyLock<Regex> = LazyLock::new(|| {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-/// Extract all documented items from a `.rs` file.
+/// Extract all public items from a `.rs` file.
+/// Items without `///` above them are included with `doc = ""`.
 pub fn parse_rs(path: &Path, content: &str) -> Vec<DocItem> {
     let lines: Vec<&str> = content.lines().collect();
     let mut items = Vec::new();
@@ -82,18 +87,22 @@ pub fn parse_rs(path: &Path, content: &str) -> Vec<DocItem> {
             continue;
         }
 
-        // Try to match a public item
+        // Skip pub use re-exports
+        if PUB_USE.is_match(line) {
+            doc_buf.clear();
+            continue;
+        }
+
+        // Emit ALL matched public items — doc="" if no /// above
         if let Some((name, kind)) = match_rs_item(line) {
-            if !doc_buf.is_empty() {
-                let sig = extract_rs_signature(&lines, idx);
-                items.push(DocItem {
-                    name,
-                    kind,
-                    signature: sig,
-                    line: idx + 1,
-                    doc: doc_buf.join("\n"),
-                });
-            }
+            let sig = extract_rs_signature(&lines, idx);
+            items.push(DocItem {
+                name,
+                kind,
+                signature: sig,
+                line: idx + 1,
+                doc: doc_buf.join("\n"),
+            });
         }
 
         // Non-comment, non-blank, non-attribute resets the doc buffer
@@ -102,12 +111,12 @@ pub fn parse_rs(path: &Path, content: &str) -> Vec<DocItem> {
         }
     }
 
-    // Suppress "unused path" warnings in callers
     let _ = path;
     items
 }
 
-/// Extract all documented items from a `.slint` file.
+/// Extract all exported items from a `.slint` file.
+/// Items without `///` above them are included with `doc = ""`.
 pub fn parse_slint(path: &Path, content: &str) -> Vec<DocItem> {
     let lines: Vec<&str> = content.lines().collect();
     let mut items = Vec::new();
@@ -127,17 +136,16 @@ pub fn parse_slint(path: &Path, content: &str) -> Vec<DocItem> {
             continue;
         }
 
+        // Emit ALL matched exported items — doc="" if no /// above
         if let Some((name, kind)) = match_slint_item(line) {
-            if !doc_buf.is_empty() {
-                let sig = extract_slint_signature(&lines, idx);
-                items.push(DocItem {
-                    name,
-                    kind,
-                    signature: sig,
-                    line: idx + 1,
-                    doc: doc_buf.join("\n"),
-                });
-            }
+            let sig = extract_slint_signature(&lines, idx);
+            items.push(DocItem {
+                name,
+                kind,
+                signature: sig,
+                line: idx + 1,
+                doc: doc_buf.join("\n"),
+            });
         }
 
         if !trimmed.starts_with("//") {
@@ -172,7 +180,6 @@ fn match_slint_item(line: &str) -> Option<(String, ItemKind)> {
 }
 
 /// Extract the signature of a Rust item starting at `start_idx`.
-/// Joins lines until we hit `{` or `;` or a blank line.
 fn extract_rs_signature(lines: &[&str], start_idx: usize) -> String {
     let mut parts = Vec::new();
     for i in start_idx..lines.len().min(start_idx + 8) {
@@ -182,7 +189,6 @@ fn extract_rs_signature(lines: &[&str], start_idx: usize) -> String {
             break;
         }
     }
-    // Strip trailing { from signature
     let joined = parts.join(" ");
     joined
         .trim_end_matches(|c| c == '{' || c == ' ')
@@ -192,7 +198,6 @@ fn extract_rs_signature(lines: &[&str], start_idx: usize) -> String {
 /// Extract the signature of a Slint item starting at `start_idx`.
 fn extract_slint_signature(lines: &[&str], start_idx: usize) -> String {
     let line = lines[start_idx].trim();
-    // For components: strip trailing { or inherits ... {
     if let Some(brace) = line.find(" {") {
         return line[..brace].trim().to_string();
     }

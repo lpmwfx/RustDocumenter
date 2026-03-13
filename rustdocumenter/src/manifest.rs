@@ -21,21 +21,22 @@ pub enum ItemKind {
 impl ItemKind {
     pub fn label(&self) -> &'static str {
         match self {
-            ItemKind::Fn => "fn",
-            ItemKind::Struct => "struct",
-            ItemKind::Enum => "enum",
-            ItemKind::Trait => "trait",
-            ItemKind::Type => "type",
-            ItemKind::Mod => "mod",
-            ItemKind::Const => "const",
+            ItemKind::Fn        => "fn",
+            ItemKind::Struct    => "struct",
+            ItemKind::Enum      => "enum",
+            ItemKind::Trait     => "trait",
+            ItemKind::Type      => "type",
+            ItemKind::Mod       => "mod",
+            ItemKind::Const     => "const",
             ItemKind::Component => "component",
-            ItemKind::Property => "property",
-            ItemKind::Callback => "callback",
+            ItemKind::Property  => "property",
+            ItemKind::Callback  => "callback",
         }
     }
 }
 
-/// A single documented item extracted from source.
+/// A single public item extracted from source.
+/// `doc` is empty if no `///` comment was found above the item.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DocItem {
     pub name: String,
@@ -43,11 +44,11 @@ pub struct DocItem {
     /// Full public signature, possibly multi-line joined with space.
     pub signature: String,
     pub line: usize,
-    /// Joined /// comment lines (leading `/// ` stripped).
+    /// Joined `///` comment lines. Empty string = undocumented.
     pub doc: String,
 }
 
-/// All documented items from a single source file.
+/// All items from a single source file (documented + undocumented).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SourceDoc {
     /// Relative path from project root, e.g. "src/lib.rs"
@@ -55,12 +56,14 @@ pub struct SourceDoc {
     pub items: Vec<DocItem>,
 }
 
-/// Summary entry in MANIFEST.json.
+/// Summary entry in MANIFEST.json — one row per source file.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ManifestEntry {
     pub source: String,
     pub man_path: String,
     pub item_count: usize,
+    /// Number of items without a `///` doc comment.
+    pub undoc_count: usize,
 }
 
 /// Summary item entry for MANIFEST all_items table.
@@ -70,6 +73,7 @@ pub struct ManifestItem {
     pub kind: String,
     pub source: String,
     pub line: usize,
+    pub documented: bool,
 }
 
 /// Top-level MANIFEST.json.
