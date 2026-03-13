@@ -75,6 +75,14 @@ pub fn generate(root: &Path, project_name: &str, docs: &[SourceDoc]) {
     let manifest_md = render_manifest_md(&manifest, total_items, undoc_items);
     fs::write(man_dir.join("MANIFEST.md"), manifest_md).expect("write MANIFEST.md");
 
+    // Write proj/ISSUES if there are undocumented items
+    if undoc_items > 0 {
+        let proj_dir = root.join("proj");
+        fs::create_dir_all(&proj_dir).ok();
+        let issues = render_issues(docs, project_name, undoc_items);
+        fs::write(proj_dir.join("ISSUES"), issues).expect("write proj/ISSUES");
+    }
+
     let doc_count = total_items - undoc_items;
     let pct = if total_items > 0 { doc_count * 100 / total_items } else { 100 };
     if undoc_items > 0 {
@@ -113,6 +121,29 @@ fn render_md(doc: &SourceDoc) -> String {
         out.push_str("\n---\n\n");
     }
 
+    out
+}
+
+fn render_issues(docs: &[SourceDoc], project_name: &str, undoc_count: usize) -> String {
+    let mut out = String::new();
+    out.push_str(&format!(
+        "# Documentation Issues — {}\n\n{} items need /// doc comments\n\n",
+        project_name, undoc_count
+    ));
+    for doc in docs {
+        let undoc: Vec<_> = doc.items.iter().filter(|i| i.doc.is_empty()).collect();
+        if undoc.is_empty() {
+            continue;
+        }
+        out.push_str(&format!("## {}\n", doc.source));
+        for item in undoc {
+            out.push_str(&format!(
+                "- line {}: `{}` ({})\n",
+                item.line, item.name, item.kind.label()
+            ));
+        }
+        out.push('\n');
+    }
     out
 }
 
