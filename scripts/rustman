@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# rustman — open rustdoc-viewer for the nearest man/ directory
+#
+# Usage:
+#   rustman              walk up from CWD to find man/MANIFEST.json
+#   rustman <PATH>       open viewer for given project/man dir
+#   rustman gen          generate man/ for CWD first, then open
+#   rustman check        check doc coverage for CWD
+
+set -euo pipefail
+
+CMD="${1:-}"
+
+case "$CMD" in
+    gen)
+        echo "Generating man/ ..."
+        rustdocumenter gen "$PWD"
+        exec rustdoc-viewer "$PWD"
+        ;;
+    check)
+        exec rustdocumenter check "$PWD"
+        ;;
+    "")
+        # Walk up from CWD
+        dir="$PWD"
+        while true; do
+            if [ -f "$dir/man/MANIFEST.json" ]; then
+                exec rustdoc-viewer "$dir"
+            fi
+            parent="$(dirname "$dir")"
+            if [ "$parent" = "$dir" ]; then
+                echo "rustman: no man/ directory found in $PWD or any parent directory" >&2
+                echo "Run 'rustman gen' to generate documentation first." >&2
+                exit 1
+            fi
+            dir="$parent"
+        done
+        ;;
+    *)
+        exec rustdoc-viewer "$CMD"
+        ;;
+esac
