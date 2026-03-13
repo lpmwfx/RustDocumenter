@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::manifest::{DocItem, ItemKind, Manifest, ManifestEntry, ManifestItem, SourceDoc};
+use crate::manifest::{Manifest, ManifestEntry, ManifestItem, SourceDoc};
 
 /// Generate man/ directory under `root` from collected `docs`.
 pub fn generate(root: &Path, project_name: &str, docs: &[SourceDoc]) {

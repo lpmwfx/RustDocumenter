@@ -1,0 +1,12 @@
+D:\REPO\Rules-dev\RustDocumenter\target\debug\deps\smartstring-0bc5044217ce2312.d: C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\lib.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\config.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\marker_byte.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\inline.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\boxed.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\casts.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\iter.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\ops.rs
+
+D:\REPO\Rules-dev\RustDocumenter\target\debug\deps\libsmartstring-0bc5044217ce2312.rmeta: C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\lib.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\config.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\marker_byte.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\inline.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\boxed.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\casts.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\iter.rs C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\ops.rs
+
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\lib.rs:
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\config.rs:
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\marker_byte.rs:
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\inline.rs:
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\boxed.rs:
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\casts.rs:
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\iter.rs:
+C:\Users\mathi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\smartstring-1.0.1\src\ops.rs:
