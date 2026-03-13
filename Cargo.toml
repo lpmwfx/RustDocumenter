@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "rustdocumenter",
+    "rustdoc-viewer",
+]
+resolver = "2"
