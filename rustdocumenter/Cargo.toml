@@ -6,6 +6,9 @@ description = "Extracts /// doc comments from Rust and Slint files and writes st
 license = "MIT"
 repository = "https://github.com/lpmwfx/RustDocumenter"
 
+[lib]
+path = "src/lib.rs"
+
 [[bin]]
 name = "rustdocumenter"
 path = "src/main.rs"

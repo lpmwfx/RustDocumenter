@@ -1,27 +1,19 @@
-//! rustdocumenter — extract /// doc comments and generate man/ documentation.
+//! rustdocumenter CLI — extract /// doc comments and generate man/ documentation.
 //!
 //! Usage:
-//!   rustdocumenter gen [PATH]    # parse .rs + .slint → write man/ JSON + MD
+//!   rustdocumenter gen [PATH]    # parse .rs + .slint → write man/ JSON + MD + warnings
 //!   rustdocumenter check [PATH]  # verify all pub items are documented, exit 1 if not
 
-mod manifest;
-mod parser;
-mod generator;
-
+use rustdocumenter::*;
 use std::env;
-use std::path::{Path, PathBuf};
-use walkdir::WalkDir;
-
-use manifest::SourceDoc;
-
-const SKIP_DIRS: &[&str] = &["target", ".git", ".cargo", "man"];
+use std::path::PathBuf;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let (cmd, root) = parse_args(&args);
 
     match cmd.as_str() {
-        "gen" => cmd_gen(&root),
+        "gen" => scan_project_at(&root),
         "check" => cmd_check(&root),
         _ => {
             eprintln!("Usage: rustdocumenter <gen|check> [PATH]");
@@ -38,19 +30,8 @@ fn parse_args(args: &[String]) -> (String, PathBuf) {
     (cmd, path)
 }
 
-// ─── Commands ─────────────────────────────────────────────────────────────────
-
-fn cmd_gen(root: &Path) {
-    let docs = collect_docs(root);
-    let project_name = root
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("project");
-    generator::generate(root, project_name, &docs);
-}
-
-fn cmd_check(root: &Path) -> ! {
-    let docs = collect_docs(root);
+fn cmd_check(root: &std::path::Path) -> ! {
+    let docs = crate::collect_docs(root);
     let mut missing = 0;
 
     for doc in &docs {
@@ -72,48 +53,4 @@ fn cmd_check(root: &Path) -> ! {
         println!("rustdocumenter: all pub items documented");
         std::process::exit(0);
     }
-}
-
-// ─── Collection ───────────────────────────────────────────────────────────────
-
-fn collect_docs(root: &Path) -> Vec<SourceDoc> {
-    let mut docs = Vec::new();
-
-    for entry in WalkDir::new(root)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-    {
-        let path = entry.path();
-
-        // Skip ignored directories
-        if path.components().any(|c| {
-            SKIP_DIRS.contains(&c.as_os_str().to_str().unwrap_or(""))
-        }) {
-            continue;
-        }
-
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
-        let items = match ext {
-            "rs" => {
-                let content = std::fs::read_to_string(path).unwrap_or_default();
-                parser::parse_rs(path, &content)
-            }
-            "slint" => {
-                let content = std::fs::read_to_string(path).unwrap_or_default();
-                parser::parse_slint(path, &content)
-            }
-            _ => continue,
-        };
-
-        let source = path
-            .strip_prefix(root)
-            .unwrap_or(path)
-            .to_string_lossy()
-            .replace('\\', "/");
-
-        docs.push(SourceDoc { source, items });
-    }
-
-    docs
 }

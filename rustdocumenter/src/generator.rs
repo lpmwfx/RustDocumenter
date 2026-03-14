@@ -75,6 +75,15 @@ pub fn generate(root: &Path, project_name: &str, docs: &[SourceDoc]) {
     let manifest_md = render_manifest_md(&manifest, total_items, undoc_items);
     fs::write(man_dir.join("MANIFEST.md"), manifest_md).expect("write MANIFEST.md");
 
+    // Write viewer.bat on Windows
+    #[cfg(target_os = "windows")]
+    {
+        let viewer_bat = man_dir.join("viewer.bat");
+        let root_path = root.display().to_string();
+        let bat_content = format!("@echo off\r\ncd /d \"{}\"\r\nrustdoc-viewer .\r\n", root_path);
+        fs::write(&viewer_bat, bat_content).expect("write viewer.bat");
+    }
+
     // Write proj/ISSUES if there are undocumented items
     if undoc_items > 0 {
         let proj_dir = root.join("proj");
@@ -124,25 +133,21 @@ fn render_md(doc: &SourceDoc) -> String {
     out
 }
 
-fn render_issues(docs: &[SourceDoc], project_name: &str, undoc_count: usize) -> String {
+fn render_issues(docs: &[SourceDoc], _project_name: &str, _undoc_count: usize) -> String {
     let mut out = String::new();
-    out.push_str(&format!(
-        "# Documentation Issues — {}\n\n{} items need /// doc comments\n\n",
-        project_name, undoc_count
-    ));
+
+    // Write in same format as rulestools scanner: path:line:col: severity rule-id: message
     for doc in docs {
         let undoc: Vec<_> = doc.items.iter().filter(|i| i.doc.is_empty()).collect();
         if undoc.is_empty() {
             continue;
         }
-        out.push_str(&format!("## {}\n", doc.source));
         for item in undoc {
             out.push_str(&format!(
-                "- line {}: `{}` ({})\n",
-                item.line, item.name, item.kind.label()
+                "{}:{}:1: warning rust/docs/doc-required: missing /// doc comment on {} `{}`\n",
+                doc.source, item.line, item.kind.label(), item.name
             ));
         }
-        out.push('\n');
     }
     out
 }
