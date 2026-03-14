@@ -1,0 +1,54 @@
+{
+  "source": "rustdocumenter/src/manifest.rs",
+  "items": [
+    {
+      "name": "ItemKind",
+      "kind": "enum",
+      "signature": "pub enum ItemKind",
+      "line": 8,
+      "doc": "Kind of documented item."
+    },
+    {
+      "name": "label",
+      "kind": "fn",
+      "signature": "pub fn label(&self) -> &'static str",
+      "line": 22,
+      "doc": ""
+    },
+    {
+      "name": "DocItem",
+      "kind": "struct",
+      "signature": "pub struct DocItem",
+      "line": 41,
+      "doc": "A single public item extracted from source.\n`doc` is empty if no `///` comment was found above the item."
+    },
+    {
+      "name": "SourceDoc",
+      "kind": "struct",
+      "signature": "pub struct SourceDoc",
+      "line": 53,
+      "doc": "All items from a single source file (documented + undocumented)."
+    },
+    {
+      "name": "ManifestEntry",
+      "kind": "struct",
+      "signature": "pub struct ManifestEntry",
+      "line": 61,
+      "doc": "Summary entry in MANIFEST.json — one row per source file."
+    },
+    {
+      "name": "ManifestItem",
+      "kind": "struct",
+      "signature": "pub struct ManifestItem",
+      "line": 71,
+      "doc": "Summary item entry for MANIFEST all_items table."
+    },
+    {
+      "name": "Manifest",
+      "kind": "struct",
+      "signature": "pub struct Manifest",
+      "line": 81,
+      "doc": "Top-level MANIFEST.json."
+    }
+  ]
+}

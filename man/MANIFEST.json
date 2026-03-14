@@ -1,0 +1,108 @@
+{
+  "generated": "2026-03-13T21:25:29.557752100+01:00",
+  "project": "RustDocumenter",
+  "files": [
+    {
+      "source": "rustdoc-viewer/src/main.rs",
+      "man_path": "man/rustdoc-viewer/src/main.json",
+      "item_count": 0,
+      "undoc_count": 0
+    },
+    {
+      "source": "rustdocumenter/src/generator.rs",
+      "man_path": "man/rustdocumenter/src/generator.json",
+      "item_count": 1,
+      "undoc_count": 0
+    },
+    {
+      "source": "rustdocumenter/src/main.rs",
+      "man_path": "man/rustdocumenter/src/main.json",
+      "item_count": 0,
+      "undoc_count": 0
+    },
+    {
+      "source": "rustdocumenter/src/manifest.rs",
+      "man_path": "man/rustdocumenter/src/manifest.json",
+      "item_count": 7,
+      "undoc_count": 1
+    },
+    {
+      "source": "rustdocumenter/src/parser.rs",
+      "man_path": "man/rustdocumenter/src/parser.json",
+      "item_count": 2,
+      "undoc_count": 0
+    }
+  ],
+  "all_items": [
+    {
+      "name": "generate",
+      "kind": "fn",
+      "source": "rustdocumenter/src/generator.rs",
+      "line": 9,
+      "documented": true
+    },
+    {
+      "name": "ItemKind",
+      "kind": "enum",
+      "source": "rustdocumenter/src/manifest.rs",
+      "line": 8,
+      "documented": true
+    },
+    {
+      "name": "label",
+      "kind": "fn",
+      "source": "rustdocumenter/src/manifest.rs",
+      "line": 22,
+      "documented": false
+    },
+    {
+      "name": "DocItem",
+      "kind": "struct",
+      "source": "rustdocumenter/src/manifest.rs",
+      "line": 41,
+      "documented": true
+    },
+    {
+      "name": "SourceDoc",
+      "kind": "struct",
+      "source": "rustdocumenter/src/manifest.rs",
+      "line": 53,
+      "documented": true
+    },
+    {
+      "name": "ManifestEntry",
+      "kind": "struct",
+      "source": "rustdocumenter/src/manifest.rs",
+      "line": 61,
+      "documented": true
+    },
+    {
+      "name": "ManifestItem",
+      "kind": "struct",
+      "source": "rustdocumenter/src/manifest.rs",
+      "line": 71,
+      "documented": true
+    },
+    {
+      "name": "Manifest",
+      "kind": "struct",
+      "source": "rustdocumenter/src/manifest.rs",
+      "line": 81,
+      "documented": true
+    },
+    {
+      "name": "parse_rs",
+      "kind": "fn",
+      "source": "rustdocumenter/src/parser.rs",
+      "line": 65,
+      "documented": true
+    },
+    {
+      "name": "parse_slint",
+      "kind": "fn",
+      "source": "rustdocumenter/src/parser.rs",
+      "line": 120,
+      "documented": true
+    }
+  ]
+}

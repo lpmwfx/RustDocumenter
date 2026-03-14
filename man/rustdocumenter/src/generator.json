@@ -1,0 +1,12 @@
+{
+  "source": "rustdocumenter/src/generator.rs",
+  "items": [
+    {
+      "name": "generate",
+      "kind": "fn",
+      "signature": "pub fn generate(root: &Path, project_name: &str, docs: &[SourceDoc])",
+      "line": 9,
+      "doc": "Generate man/ directory under `root` from collected `docs`."
+    }
+  ]
+}

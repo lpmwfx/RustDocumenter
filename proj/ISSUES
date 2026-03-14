@@ -1,0 +1,7 @@
+# Documentation Issues — RustDocumenter
+
+1 items need /// doc comments
+
+## rustdocumenter/src/manifest.rs
+- line 22: `label` (fn)
+

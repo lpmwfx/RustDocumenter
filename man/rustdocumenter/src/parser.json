@@ -1,0 +1,19 @@
+{
+  "source": "rustdocumenter/src/parser.rs",
+  "items": [
+    {
+      "name": "parse_rs",
+      "kind": "fn",
+      "signature": "pub fn parse_rs(path: &Path, content: &str) -> Vec<DocItem>",
+      "line": 65,
+      "doc": "Extract all public items from a `.rs` file.\nItems without `///` above them are included with `doc = \"\"`."
+    },
+    {
+      "name": "parse_slint",
+      "kind": "fn",
+      "signature": "pub fn parse_slint(path: &Path, content: &str) -> Vec<DocItem>",
+      "line": 120,
+      "doc": "Extract all exported items from a `.slint` file.\nItems without `///` above them are included with `doc = \"\"`."
+    }
+  ]
+}
