@@ -19,12 +19,11 @@ pub fn process_file(root: &Path, source_doc: &SourceDoc, docgen_state: &mut DocG
         }
     };
 
-    let generated = item_processor::generate_all(&content, source_doc, docgen_state);
+    let (rewritten, count) = item_processor::rewrite(&content, source_doc, docgen_state);
 
-    if generated > 0 {
-        let rewritten = item_processor::rewrite(&content, source_doc, docgen_state);
+    if count > 0 {
         match gateway::write_file(&file_path, &rewritten) {
-            Ok(()) => docgen_state.generated += generated,
+            Ok(()) => docgen_state.generated += count,
             Err(e) => docgen_state.log.push(format!("  error writing {}: {e}", source_doc.source)),
         }
     }

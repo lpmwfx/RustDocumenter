@@ -5,6 +5,7 @@
 //!   rustdocumenter doc [PATH]    # same as default
 //!   rustdocumenter gen [PATH]    # parse .rs + .slint → write man/ JSON + MD + warnings
 //!   rustdocumenter check [PATH]  # verify all pub items are documented, exit 1 if not
+//!   rustdocumenter diag          # verify AI backend (Claude/Codex) is available
 
 mod cmd;
 
@@ -16,6 +17,7 @@ enum Cmd {
     Gen,
     Check,
     Doc,
+    Diag,
 }
 
 const PATH_ARG_INDEX: usize = 2;
@@ -38,6 +40,11 @@ fn main() {
         Cmd::Doc => {
             for line in cmd::doc::run(&root) { println!("{line}"); }
         }
+        Cmd::Diag => {
+            let (code, lines) = cmd::diag::run();
+            for line in &lines { println!("{line}"); }
+            std::process::exit(code);
+        }
     }
 }
 
@@ -47,8 +54,9 @@ fn parse_args(args: &[String]) -> (Cmd, PathBuf) {
         None               => Cmd::Doc,
         Some("check")      => Cmd::Check,
         Some("doc")        => Cmd::Doc,
+        Some("diag")       => Cmd::Diag,
         Some(_) => {
-            eprintln!("Usage: rustdocumenter <gen|check|doc> [PATH]");
+            eprintln!("Usage: rustdocumenter <gen|check|doc|diag> [PATH]");
             std::process::exit(1);
         }
     };
