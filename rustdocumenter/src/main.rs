@@ -1,9 +1,10 @@
 //! rustdocumenter CLI — extract /// doc comments and generate man/ documentation.
 //!
 //! Usage:
+//!   rustdocumenter [PATH]        # (default) auto-generate /// for undocumented items via AI
+//!   rustdocumenter doc [PATH]    # same as default
 //!   rustdocumenter gen [PATH]    # parse .rs + .slint → write man/ JSON + MD + warnings
 //!   rustdocumenter check [PATH]  # verify all pub items are documented, exit 1 if not
-//!   rustdocumenter doc [PATH]    # auto-generate /// for undocumented items via AI
 
 mod cmd;
 
@@ -42,7 +43,8 @@ fn main() {
 
 fn parse_args(args: &[String]) -> (Cmd, PathBuf) {
     let cmd = match args.get(1).map(|s| s.as_str()) {
-        Some("gen") | None => Cmd::Gen,
+        Some("gen")        => Cmd::Gen,
+        None               => Cmd::Doc,
         Some("check")      => Cmd::Check,
         Some("doc")        => Cmd::Doc,
         Some(_) => {
