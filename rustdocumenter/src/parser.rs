@@ -214,13 +214,20 @@ fn extract_slint_signature(lines: &[&str], start_idx: usize) -> String {
 
 /// Extract the body of an item starting at a 1-based line number.
 ///
-/// Counts braces from the item line to the matching `}`.
-/// Returns the body content as a string (max 50 lines for AI context).
+/// For single-line items (no opening `{` on the item line), returns just
+/// that line — avoids feeding unrelated sibling lines as AI context.
+/// For multi-line items (structs, fns, components), counts braces to the
+/// matching `}`, capped at 50 lines.
 pub fn extract_body(content: &str, start_line: usize) -> String {
     let lines: Vec<&str> = content.lines().collect();
     let start_idx = start_line.saturating_sub(1);
     if start_idx >= lines.len() {
         return String::new();
+    }
+
+    // Single-line items (property, const, type alias, etc.) — return only the item line.
+    if !lines[start_idx].contains('{') {
+        return lines[start_idx].trim().to_string();
     }
 
     let mut depth: i32 = 0;

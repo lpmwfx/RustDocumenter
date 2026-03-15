@@ -30,13 +30,17 @@ pub fn generate_doc(signature: &str, body: &str, kind: &str, name: &str) -> Resu
     }
 }
 
+const SLINT_KINDS: &[&str] = &["property", "callback", "component"];
+
 /// Build the prompt sent to the AI model.
 fn build_prompt(signature: &str, body: &str, kind: &str, _name: &str) -> String {
-    let code = if body.is_empty() { signature.to_string() } else { body.to_string() };
+    let lang = if SLINT_KINDS.contains(&kind) { "Slint" } else { "Rust" };
+    // For single-line items body == signature; for multi-line body is the full block.
+    let code = if body.is_empty() || body == signature { signature.to_string() } else { body.to_string() };
 
     format!(
-        "```rust\n{code}\n```\n\n\
-         Write a 1-3 line /// doc comment for this Rust {kind}. \
+        "```\n{code}\n```\n\n\
+         Write a 1-3 line /// doc comment for this {lang} {kind}. \
          Output ONLY the plain text of the comment. \
          Do not include /// prefix. Do not include code fences. \
          Do not ask questions. Do not include any preamble."
