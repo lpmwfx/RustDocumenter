@@ -21,6 +21,7 @@ use std::sync::{LazyLock, OnceLock};
 use manifest::SourceDoc;
 
 const SKIP_DIRS: &[&str] = &["target", ".git", ".cargo", "man"];
+const CARGO_TOML: &str = "Cargo.toml";
 
 /// Compiled Rust regex patterns — initialised once, owned by the mother.
 pub static RS_PATTERNS: LazyLock<parser::RsPatterns> = LazyLock::new(|| {
@@ -46,4 +47,75 @@ pub static INIT_ERROR: OnceLock<String> = OnceLock::new();
 /// Recursively collects and parses source documents from Rust and Slint files.
 pub fn collect_docs(root: &std::path::Path) -> Vec<SourceDoc> {
     gateway::collect_docs(root, SKIP_DIRS, &RS_PATTERNS, &SLINT_PATTERNS)
+}
+
+/// Auto-generate `///` doc comments for all undocumented public items.
+///
+/// Designed to be called from `build.rs` as a `[build-dependencies]` entry.
+/// Traverses `.rs` and `.slint` source files in the project, generates doc
+/// comments via AI (Claude Code CLI, fallback Codex CLI), and writes them
+/// directly into the source files.
+///
+/// On the first build, missing docs are filled in and Cargo detects the
+/// changed files — the project recompiles with the new comments in place.
+/// On subsequent builds, all items are already documented and nothing is
+/// written, so the build is fast.
+///
+/// Emits `cargo:warning=` lines for each item documented (visible in
+/// `cargo build` output). Silent when all items are already documented.
+pub fn document_project() {
+    use std::io::Write;
+
+    let root = resolve_build_root();
+    let doc_result = docgen::document_project(&root, &RS_PATTERNS, &SLINT_PATTERNS);
+
+    for line in &doc_result.log {
+        let trimmed = line.trim();
+        if !trimmed.is_empty() {
+            let _ = writeln!(std::io::stdout(), "cargo:warning=rustdocumenter: {trimmed}");
+        }
+    }
+
+    if doc_result.generated > 0 {
+        let _ = writeln!(
+            std::io::stdout(),
+            "cargo:warning=rustdocumenter: {} item(s) documented",
+            doc_result.generated
+        );
+    }
+
+    if doc_result.skipped > 0 {
+        let _ = writeln!(
+            std::io::stdout(),
+            "cargo:warning=rustdocumenter: {} item(s) skipped (AI unavailable)",
+            doc_result.skipped
+        );
+    }
+}
+
+/// Resolve the project root for build-script context.
+///
+/// Walks up from `CARGO_MANIFEST_DIR` to find the workspace root
+/// (a `Cargo.toml` containing `[workspace]`), falling back to the
+/// manifest directory itself for single-crate projects.
+fn resolve_build_root() -> std::path::PathBuf {
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from(".")));
+
+    let mut dir = manifest_dir.clone();
+    loop {
+        let cargo_toml = dir.join(CARGO_TOML);
+        if cargo_toml.exists() {
+            if let Ok(content) = gateway::read_file(&cargo_toml) {
+                if content.contains("[workspace]") {
+                    return dir;
+                }
+            }
+        }
+        match dir.parent().map(|p| p.to_path_buf()) {
+            Some(parent) if parent != dir => dir = parent,
+            _ => return manifest_dir,
+        }
+    }
 }
