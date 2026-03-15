@@ -1,0 +1,31 @@
+//! Per-file doc insertion: generates and writes `///` comments for one file.
+
+use std::path::Path;
+
+use crate::gateway;
+use crate::manifest::SourceDoc;
+
+use crate::docgen::DocGenResult;
+use crate::docgen::item_processor;
+
+/// Generate and insert `///` docs for all undocumented items in one source file.
+pub fn process_file(root: &Path, source_doc: &SourceDoc, docgen_state: &mut DocGenResult) {
+    let file_path = root.join(&source_doc.source);
+    let content = match gateway::read_file(&file_path) {
+        Ok(c) => c,
+        Err(e) => {
+            docgen_state.log.push(format!("  skip {}: {e}", source_doc.source));
+            return;
+        }
+    };
+
+    let generated = item_processor::generate_all(&content, source_doc, docgen_state);
+
+    if generated > 0 {
+        let rewritten = item_processor::rewrite(&content, source_doc, docgen_state);
+        match gateway::write_file(&file_path, &rewritten) {
+            Ok(()) => docgen_state.generated += generated,
+            Err(e) => docgen_state.log.push(format!("  error writing {}: {e}", source_doc.source)),
+        }
+    }
+}

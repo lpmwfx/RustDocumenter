@@ -19,6 +19,7 @@ pub enum ItemKind {
 }
 
 impl ItemKind {
+    /// Returns the string label for this item kind (e.g. "fn", "struct", "enum").
     pub fn label(&self) -> &'static str {
         match self {
             ItemKind::Fn        => "fn",
@@ -33,6 +34,13 @@ impl ItemKind {
             ItemKind::Callback  => "callback",
         }
     }
+}
+
+/// Source language of a parsed file.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SourceLang {
+    Rust,
+    Slint,
 }
 
 /// A single public item extracted from source.

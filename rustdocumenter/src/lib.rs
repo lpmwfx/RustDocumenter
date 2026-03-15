@@ -3,101 +3,47 @@
 //! Scans .rs and .slint files for /// doc comments.
 //! Generates man/ documentation and warns if comments are missing.
 
+/// AI-powered doc comment generation via Claude Code CLI and Codex CLI fallback.
+pub mod ai;
+/// Orchestrates auto-documentation: finds undocumented items and inserts AI-generated `///` comments.
+pub mod docgen;
+/// IO gateway — filesystem and process operations.
+pub mod gateway;
+/// Shared serde types for the `man/` file format.
 pub mod manifest;
+/// Extracts public items and `///` doc comments from `.rs` and `.slint` files.
 pub mod parser;
+/// Writes `man/` output: per-file JSON + Markdown pages and MANIFEST indexes.
 pub mod generator;
 
-use std::path::{Path, PathBuf};
-use walkdir::WalkDir;
+use std::sync::{LazyLock, OnceLock};
 
 use manifest::SourceDoc;
 
 const SKIP_DIRS: &[&str] = &["target", ".git", ".cargo", "man"];
 
-/// Scan the project for /// doc comments.
-/// Generates man/ documentation.
-/// Emits warnings for missing doc comments.
-pub fn scan_project() {
-    let root = std::env::var("CARGO_MANIFEST_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("."));
+/// Compiled Rust regex patterns — initialised once, owned by the mother.
+pub static RS_PATTERNS: LazyLock<parser::RsPatterns> = LazyLock::new(|| {
+    parser::RsPatterns::new().unwrap_or_else(|e| {
+        INIT_ERROR.set(format!("Rust regex: {e}")).ok();
+        // Safety: LazyLock must return a value; if init fails the error is
+        // stored and collect_docs will return empty, main will exit cleanly.
+        parser::RsPatterns::empty()
+    })
+});
 
-    scan_project_at(&root);
-}
+/// Compiled Slint regex patterns — initialised once, owned by the mother.
+pub static SLINT_PATTERNS: LazyLock<parser::SlintPatterns> = LazyLock::new(|| {
+    parser::SlintPatterns::new().unwrap_or_else(|e| {
+        INIT_ERROR.set(format!("Slint regex: {e}")).ok();
+        parser::SlintPatterns::empty()
+    })
+});
 
-/// Scan project at a specific path.
-pub fn scan_project_at(root: &Path) {
-    let docs = collect_docs(root);
-    let project_name = root
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("project");
+/// Stores a regex compilation error if one occurred during initialisation.
+pub static INIT_ERROR: OnceLock<String> = OnceLock::new();
 
-    // Generate man/ documentation
-    generator::generate(root, project_name, &docs);
-
-    // Emit warnings for missing doc comments
-    let mut missing_count = 0;
-    for doc in &docs {
-        for item in &doc.items {
-            if item.doc.is_empty() {
-                eprintln!(
-                    "{}:{}:1: warning rust/docs/doc-required: missing /// doc comment on {} `{}`",
-                    doc.source, item.line, item.kind.label(), item.name
-                );
-                missing_count += 1;
-            }
-        }
-    }
-
-    if missing_count > 0 {
-        eprintln!(
-            "rustdocumenter: {} items missing /// doc comments",
-            missing_count
-        );
-    }
-}
-
-// ─── Collection ───────────────────────────────────────────────────────────────
-
-pub fn collect_docs(root: &Path) -> Vec<SourceDoc> {
-    let mut docs = Vec::new();
-
-    for entry in WalkDir::new(root)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_file())
-    {
-        let path = entry.path();
-
-        // Skip ignored directories
-        if path.components().any(|c| {
-            SKIP_DIRS.contains(&c.as_os_str().to_str().unwrap_or(""))
-        }) {
-            continue;
-        }
-
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
-        let items = match ext {
-            "rs" => {
-                let content = std::fs::read_to_string(path).unwrap_or_default();
-                parser::parse_rs(path, &content)
-            }
-            "slint" => {
-                let content = std::fs::read_to_string(path).unwrap_or_default();
-                parser::parse_slint(path, &content)
-            }
-            _ => continue,
-        };
-
-        let source = path
-            .strip_prefix(root)
-            .unwrap_or(path)
-            .to_string_lossy()
-            .replace('\\', "/");
-
-        docs.push(SourceDoc { source, items });
-    }
-
-    docs
+/// Recursively collects and parses source documents from Rust and Slint files.
+pub fn collect_docs(root: &std::path::Path) -> Vec<SourceDoc> {
+    gateway::collect_docs(root, SKIP_DIRS, &RS_PATTERNS, &SLINT_PATTERNS)
 }
