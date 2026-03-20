@@ -28,3 +28,12 @@ Coverage: **9/10** items documented (**90%**) — ⚠ **1 undocumented**
 | `Manifest` | struct | rustdocumenter/src/manifest.rs | 81 | ✓ |
 | `parse_rs` | fn | rustdocumenter/src/parser.rs | 65 | ✓ |
 | `parse_slint` | fn | rustdocumenter/src/parser.rs | 120 | ✓ |
+
+
+---
+
+<!-- LARS:START -->
+<a href="https://lpmathiasen.com">
+  <img src="https://carousel.lpmathiasen.com/carousel.svg?slot=20" alt="Lars P. Mathiasen"/>
+</a>
+<!-- LARS:END -->
