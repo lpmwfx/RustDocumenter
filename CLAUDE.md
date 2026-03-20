@@ -59,3 +59,12 @@ The `rust/docs/doc-required` rule is enforced by:
 - **RulesTools** — `rust/checks/doc_required.py` — `rulestools scan` ERROR
 
 Both reference rule: `rust/docs/doc-required`
+
+
+---
+
+<!-- LARS:START -->
+<a href="https://lpmathiasen.com">
+  <img src="https://carousel.lpmathiasen.com/carousel.svg?slot=20" alt="Lars P. Mathiasen"/>
+</a>
+<!-- LARS:END -->
