@@ -194,3 +194,12 @@ cargo install --quiet --force --git https://github.com/lpmwfx/RustDocumenter rus
 ```
 
 Note: Use `--force` flag to ensure clean reinstalls, since both crates build separate binaries.
+
+
+---
+
+<!-- LARS:START -->
+<a href="https://lpmathiasen.com">
+  <img src="https://carousel.lpmathiasen.com/carousel.svg?slot=20" alt="Lars P. Mathiasen"/>
+</a>
+<!-- LARS:END -->
